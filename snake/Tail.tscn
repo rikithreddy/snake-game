@@ -1,0 +1,39 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://tail.png" type="Texture" id=1]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Area2D
+
+var direction_list = []
+var position_list = []
+var g_direction = null
+var speed = 1
+
+func update_node():
+	# bug for initial case
+	g_direction = direction_list.pop_front()
+	return position_list.pop_front()
+	
+func add_location(dir, pos):
+	direction_list.append(dir)
+	position_list.append(pos)
+
+
+func _on_Body_body_entered(body):
+	if body.name == \"Player\" and name != \"2\":
+		get_tree().change_scene(\"res://World.tscn\")
+"
+
+[sub_resource type="RectangleShape2D" id=2]
+extents = Vector2( 6, 6 )
+
+[node name="Body" type="Area2D"]
+script = SubResource( 1 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource( 2 )
+
+[node name="Sprite" type="Sprite" parent="."]
+texture = ExtResource( 1 )
+[connection signal="body_entered" from="." to="." method="_on_Body_body_entered"]
