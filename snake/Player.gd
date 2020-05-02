@@ -8,6 +8,7 @@ const INITIAL_COORD = Vector2(72, 72)
 
 var score = 0
 var flag = false
+var pause = -1
 
 onready var direction = Vector2(1,0)
 onready var tail = preload("res://Tail.tscn")
@@ -17,11 +18,13 @@ var speed = step * BASE_SPEED
 var stored_vector = Vector2.ZERO
 var body = null
 var command_list = []
+var alive = false
+var start = true
 
 func _ready():
 	position = INITIAL_COORD
 	body = get_child(2)
-	add_tail()
+	
 	
 	
 	
@@ -60,12 +63,33 @@ func update_move_direction():
 			stored_vector = Vector2.ZERO
 
 func _physics_process(delta):
-	update_move_direction()
-	move_and_slide(direction * speed )
-	if is_on_wall():
-		get_tree().change_scene("res://World.tscn")
-	update_tail()
-
+	if alive:
+		if Input.is_action_just_pressed("pause"):
+			pause *= -1
+		if pause == 1:
+			get_parent().get_node("Pause").visible = true
+		else:
+			get_parent().get_node("Pause").visible = false
+			
+			update_move_direction()
+			move_and_slide(direction * speed )
+			if is_on_wall():
+				get_parent().get_node("Pause").set_text("GAME OVER\npress enter to continue\n Score="+str(score))
+				get_parent().get_node("Pause").visible = true
+				alive = false
+				
+			update_tail()
+	elif start:
+		if Input.is_action_just_pressed("enter"):
+			start = false
+			alive = true
+			get_parent().get_node("Start").visible = false
+			add_tail()	
+	else:
+		if Input.is_action_just_pressed("enter"):
+			get_tree().change_scene("res://World.tscn")
+			
+		
 func add_tail():
 	var tail_child = tail.instance()
 	var tail_nodes = body.get_child_count()
@@ -82,6 +106,7 @@ func add_tail():
 		dir = child.g_direction
 
 	tail_child.global_position = cor - GAP*dir
+	print(global_position)
 	tail_child.g_direction = dir
 	for i in range(0, GAP):
 		tail_child.add_location(dir, cor+ (i+1)*dir - GAP * dir)

@@ -22,7 +22,9 @@ func add_location(dir, pos):
 
 func _on_Body_body_entered(body):
 	if body.name == \"Player\" and name != \"2\":
-		get_tree().change_scene(\"res://World.tscn\")
+		body.get_parent().get_node(\"Pause\").set_text(\"GAME OVER\\npress enter to continue\\n Score=\"+str(body.score))
+		body.get_parent().get_node(\"Pause\").visible = true
+		body.alive = false
 "
 
 [sub_resource type="RectangleShape2D" id=2]
@@ -35,5 +37,6 @@ script = SubResource( 1 )
 shape = SubResource( 2 )
 
 [node name="Sprite" type="Sprite" parent="."]
+z_index = 1
 texture = ExtResource( 1 )
 [connection signal="body_entered" from="." to="." method="_on_Body_body_entered"]
